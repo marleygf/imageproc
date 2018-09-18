@@ -1,0 +1,30 @@
+CISC/CMPE 457 Assignment 1
+
+Due September 28 before class.
+
+In this assignment you'll build an image editor.  You may work in
+groups of two.  Graduate students must work individually.
+
+1. Get the main.py code running.  Read all of the code and understand
+   how it works.
+
+2. Modify applyBrightnessAndContrast() according to the comment above
+   that function in the code.
+
+3. Modify performHistoEqualization() according to the comment above
+   that function in the code.
+
+4. Modify scaleImage() according to the comment above that function in
+   the code.
+
+To submit:
+
+In a single directory called 'a1' put the following files:
+
+  README.txt - containing the name, student number, and netID of each
+               person working on the assignment.  Include here any
+               comments you have for the TA. 
+
+  main.py    - the modified code, well commented.
+
+For marking, we will read your code and will run your code.
