@@ -12,7 +12,6 @@
 # colourspace, and that you should manipulate only the Y component of
 # each pixel when doing intensity changes.
 
-
 import sys, os, numpy, math
 
 try: # Pillow
@@ -73,7 +72,7 @@ def applyBrightnessAndContrast( brightness, contrast ):
 
   srcPixels = tempImage.load()
   dstPixels = currentImage.load()
-
+  
   # YOUR CODE HERE
   # TEST
 
@@ -88,9 +87,35 @@ def performHistoEqualization( radius ):
   pixels = currentImage.load()
   width  = currentImage.size[0]
   height = currentImage.size[1]
-
   # YOUR CODE HERE
-
+  
+  #get histbox from radius and width/height
+  #make histogram
+  #sum?
+      
+  for w in range(width -1):
+    for h in range(height -1):
+      r = pixels[w,h]
+      r = r[0]
+      N = numpy.power(radius * 2, 2)
+      theSum = 0
+      # make box from a list of pixels here
+      # learn how to manipulate pixelaccess objects
+      box = []
+      for j in range(w - radius , w + radius + 1):
+        for k in range(h - radius , h + radius + 1):
+          if j < width and j >= 0 and k < height and k >= 0:
+            p = pixels[j,k]
+            box.append(p[0])
+      for are in range(r):
+        cc = box.count(are)
+        theSum = theSum + cc
+      s = ((256/N) * theSum) - 1 
+      temp = list(pixels[w,h])
+      temp[0] = s
+      temp = tuple(temp)
+      pixels[w,h] = temp
+      
   print 'perform local histogram equalization with radius %d' % radius
 
 
