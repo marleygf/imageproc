@@ -42,7 +42,7 @@ localHistoRadius = 5  # distance within which to apply local histogram equalizat
 # Current image
 
 imgDir      = 'images'
-imgFilename = 'mandrill.png'
+imgFilename = 'pup.jpg'
 
 currentImage = Image.open( os.path.join( imgDir, imgFilename ) ).convert( 'YCbCr' ).transpose( Image.FLIP_TOP_BOTTOM )
 tempImage    = None
@@ -97,10 +97,8 @@ def performHistoEqualization( radius ):
     for h in range(height -1):
       r = pixels[w,h]
       r = r[0]
-      N = numpy.power(radius * 2, 2)
+      N = numpy.power((radius * 2) + 1, 2)
       theSum = 0
-      # make box from a list of pixels here
-      # learn how to manipulate pixelaccess objects
       box = []
       for j in range(w - radius , w + radius + 1):
         for k in range(h - radius , h + radius + 1):
