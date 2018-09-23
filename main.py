@@ -93,8 +93,8 @@ def performHistoEqualization( radius ):
   #make histogram
   #sum?
   temp = [[0 for x in range(width)] for y in range(height)]     
-  for w in range(width -1):
-    for h in range(height -1):
+  for w in range(width):
+    for h in range(height):
       r = pixels[w,h]
       r = r[0]
       N = numpy.power((radius * 2) + 1, 2)
@@ -134,7 +134,28 @@ def scaleImage( factor ):
   dstPixels = currentImage.load()
 
   # YOUR CODE HERE
-
+  # newArea = factor * width * height
+  # newWidth  = math.sqrt(newArea * width / height);
+  # newHeight = math.sqrt(newArea * height / width);
+  # newWidth = round(newWidth)
+  # newHeight = round(newHeight) 
+  # newArea = newWidth * newHeight
+  # s = newWidth/width
+  
+  #newWidth = round(factor * height)
+  #newHeight = round(factor * width)
+  #tp = numpy.linalg.inv(numpy.matrix([[factor, 0], [0, factor]]))
+  
+  for xp in range(width):
+    for yp in range(height):
+      #b = np.matrix([[xp, yp])
+      #a = tp * b
+      x = round(xp/factor)
+      y = round(yp/factor)
+      if x < width and y < height:
+        dstPixels[xp,yp] = srcPixels[x,y]
+      else:
+        dstPixels[xp,yp] = (0,128,128)
   print 'scale image by %f' % factor
 
   
