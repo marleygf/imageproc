@@ -42,7 +42,7 @@ localHistoRadius = 5  # distance within which to apply local histogram equalizat
 # Current image
 
 imgDir      = 'images'
-imgFilename = 'pup.jpg'
+imgFilename = 'mandrill.png'
 
 currentImage = Image.open( os.path.join( imgDir, imgFilename ) ).convert( 'YCbCr' ).transpose( Image.FLIP_TOP_BOTTOM )
 tempImage    = None
@@ -73,7 +73,6 @@ def applyBrightnessAndContrast( brightness, contrast ):
   srcPixels = tempImage.load()
   dstPixels = currentImage.load()
   
-  # YOUR CODE HERE
   for w in range(width): 				#increment through width of image
 	for h in range (height): 			#increment through height of image
 		
@@ -90,34 +89,50 @@ def performHistoEqualization( radius ):
   pixels = currentImage.load()
   width  = currentImage.size[0]
   height = currentImage.size[1]
-  # YOUR CODE HERE
   
-  #get histbox from radius and width/height
-  #make histogram
-  #sum?
-  temp = [[0 for x in range(width)] for y in range(height)]     
+  equalized = [[0 for x in range(width)] for y in range(height)] # Temporary array to store new intensity values     
+  
   for w in range(width):
     for h in range(height):
+      
+      # Get intensity of current pixel
       r = pixels[w,h]
-      r = r[0]
-      N = numpy.power((radius * 2) + 1, 2)
-      theSum = 0
-      box = []
+      r = r[0] 
+      
+      # Acts as pseudo-histogram to store surrounding pixel intensities. This is done to avoid having 256 empty buckets
+      # that then need to be emptied each time
+      box = [] 
+      
+      # Calculate size of area covered by radius 
+      N = numpy.power((radius * 2) + 1, 2) 
+      
+      #Itterate through area covered by radius around target pixel
       for j in range(w - radius , w + radius + 1):
         for k in range(h - radius , h + radius + 1):
-          if j < width and j >= 0 and k < height and k >= 0:
+	  
+	  # Ensure in bounds and add to list.
+          if j < width and j >= 0 and k < height and k >= 0: 
             p = pixels[j,k]
             box.append(p[0])
-      for are in range(r + 1):
-        cc = box.count(are)
-        theSum = theSum + cc
-      s = ((256/N) * theSum) - 1 
-      temp[h][w] = s
+	  # If sourcing from out of bounds, that means we're at a corner
+	  # or edge pixel, so we ignore and shrink N value for calculation
+	  else:
+	    N = N - 1
       
+      theSum = 0
+      for i in range(r + 1): # For each intensity...
+        cc = box.count(i) # ...count the occurences of the intensity...
+        theSum = theSum + cc # ...and add it to the sum
+      
+      # Calculate new pixel intensity and store in temporary list
+      s = ((256/N) * theSum) - 1
+      equalized[h][w] = s
+
+  #Copy new intensities to current image
   for w in range(width):
     for h in range(height):
       eq = list(pixels[w,h])
-      eq[0] = temp[h][w]
+      eq[0] = equalized[h][w]
       eq = tuple(eq)
       pixels[w,h] = eq      
   print 'perform local histogram equalization with radius %d' % radius
@@ -135,21 +150,37 @@ def scaleImage( factor ):
 
   srcPixels = tempImage.load()
   dstPixels = currentImage.load()
-
-  # YOUR CODE HERE
-  t_scale = numpy.linalg.inv(numpy.matrix([[factor, 0, 0], [0, factor, 0], [0, 0, 1]]))
-  t_trans = numpy.linalg.inv(numpy.matrix([[1, 0, -(width/2)], [0, 1, -(height/2)], [0, 0, 1]]))
-  tp = numpy.linalg.inv(t_scale * t_trans)
-  for xp in range(int(round(width))):
-    for yp in range(int(round(height))):
-      b = numpy.matrix([[xp], [yp], [1]])
-      a = (tp * b)
-      x = round(a[0,0])
-      y = round(a[1,0])
+  
+  # xp, yp are x' and y' (prime) respectively, the points in the destination image for backwards projection
+  # We loop through the current width and height because we are only concerned about drawing the pixels within
+  # this "canvas" area
+  for xp in range(width):
+    for yp in range(height):
+      
+      # Translate coordinates by center coordinate
+      xp = xp - width/2
+      yp = yp - height/2    
+      
+      # Backwards projection to source image by diving by factor instead of multiplying, rounding to ensure legal value
+      x = round(xp/factor)
+      y = round(yp/factor)
+      
+      # Translate back to image origin (0,0)
+      x = x + width/2
+      y = y + height/2 
+      
+      # Translate xp and yp back as well, to draw to correct area in canvas
+      xp = xp + width/2
+      yp = yp + height/2  
+      
+      # Only source from legal image values within dimensions of canvas
       if x < width and y < height and x > -1 and y > -1:
         dstPixels[xp,yp] = srcPixels[x,y]
+	
+      # Otherwise, assign to pixel to white 
       else:
-        dstPixels[xp,yp] = (0,128,128)      
+        dstPixels[xp,yp] = (255,128,128)      
+  
   print 'scale image by %f' % factor
 
   
