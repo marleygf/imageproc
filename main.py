@@ -42,7 +42,7 @@ localHistoRadius = 5  # distance within which to apply local histogram equalizat
 # Current image
 
 imgDir      = 'images'
-imgFilename = 'veggies.jpg'
+imgFilename = 'pup.jpg'
 
 currentImage = Image.open( os.path.join( imgDir, imgFilename ) ).convert( 'YCbCr' ).transpose( Image.FLIP_TOP_BOTTOM )
 tempImage    = None
@@ -134,28 +134,19 @@ def scaleImage( factor ):
   dstPixels = currentImage.load()
 
   # YOUR CODE HERE
-  # newArea = factor * width * height
-  # newWidth  = math.sqrt(newArea * width / height);
-  # newHeight = math.sqrt(newArea * height / width);
-  # newWidth = round(newWidth)
-  # newHeight = round(newHeight) 
-  # newArea = newWidth * newHeight
-  # s = newWidth/width
-  
-  #newWidth = round(factor * height)
-  #newHeight = round(factor * width)
-  #tp = numpy.linalg.inv(numpy.matrix([[factor, 0], [0, factor]]))
-  
-  for xp in range(width):
-    for yp in range(height):
-      #b = np.matrix([[xp, yp])
-      #a = tp * b
-      x = round(xp/factor)
-      y = round(yp/factor)
-      if x < width and y < height:
+  t_scale = numpy.linalg.inv(numpy.matrix([[factor, 0, 0], [0, factor, 0], [0, 0, 1]]))
+  t_trans = numpy.linalg.inv(numpy.matrix([[1, 0, -(width/2)], [0, 1, -(height/2)], [0, 0, 1]]))
+  tp = numpy.linalg.inv(t_scale * t_trans)
+  for xp in range(int(round(width))):
+    for yp in range(int(round(height))):
+      b = numpy.matrix([[xp], [yp], [1]])
+      a = (tp * b)
+      x = round(a[0,0])
+      y = round(a[1,0])
+      if x < width and y < height and x > -1 and y > -1:
         dstPixels[xp,yp] = srcPixels[x,y]
       else:
-        dstPixels[xp,yp] = (0,128,128)
+        dstPixels[xp,yp] = (0,128,128)      
   print 'scale image by %f' % factor
 
   
