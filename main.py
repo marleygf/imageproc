@@ -106,7 +106,7 @@ def performHistoEqualization( radius ):
       # Calculate size of area covered by radius 
       N = numpy.power((radius * 2) + 1, 2) 
       
-      #Itterate through area covered by radius around target pixel
+      #Iterate through area covered by radius around target pixel
       for j in range(w - radius , w + radius + 1):
         for k in range(h - radius , h + radius + 1):
 	  
