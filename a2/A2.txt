@@ -1,0 +1,29 @@
+CISC/CMPE 457 Assignment 2
+
+Due October 30 before class
+
+In this assignment, you will take an image of ECG traces and will
+remove the grid lines in preparation for digitizing the traces (which
+will be done in Assignment 3).
+
+Undergraduates may work in groups of two.  Graduate students must work
+individually.
+
+1. Get the main.py code running.  Read all of the code and understand
+   how it works.
+
+2. Modify compute() according to the comment above that function in
+   the code.
+
+To submit:
+
+In a single directory called 'a2' put the following files:
+
+  README.txt - containing the name, student number, and netID of each
+               person working on the assignment.  Include here any
+               comments you have for the TA. 
+
+  main.py    - the modified code, well commented.
+
+For marking, we will read your code and will run your code on the
+images provided, and on other images.
