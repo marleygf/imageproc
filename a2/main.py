@@ -101,10 +101,18 @@ def compute():
   # Forward FT
 
   print '1. compute FT'
-      
-  # Compute magnitudes and find the maximum (excluding the DC component)
+  imageFT = forwardFT(image)
 
+  # Compute magnitudes and find the maximum (excluding the DC component)
+  mags = [[0 for x in range(width)] for y in range(height)] 
   print '2. computing FT magnitudes'
+  for h in range(height):
+    for w in range(width):
+      mags[h][w] = magFromComplex(imageFT[h,w])
+
+  tempZero = mags[0][0]
+  mags[0][0] = 0
+  maxMag = max(map(max, mags))
 
   # Zero the components that are less than 40% of the max
 
