@@ -115,11 +115,21 @@ def compute():
   maxMag = max(map(max, mags))
 
   # Zero the components that are less than 40% of the max
-
   print '3. removing low-magnitude components'
 
   if gridImageFT is None:
     gridImageFT = np.zeros( (height,width), dtype=np.complex_ )
+
+  zeroed = [[False for x in range(width)] for y in range(height)] #storing which ones we did and did not set to zero for later
+  threshold = 0.4 * maxMag # as per block comment instructions abve
+  mags[0][0] = tempZero #reset this (not sure if this is right)
+  for h in range(height):
+    for w in range(width):
+      if mags[h][w] < threshold:
+        gridImageFT[h,w] = 0 #set to zero if below threshold
+        zeroed[h][w] = True
+      else:
+        gridImageFT[h,w] = imageFT[h,w] #otherwise copy value unchaged
 
   # Find (angle, distance) to each peak
   #
@@ -133,6 +143,7 @@ def compute():
 
   print '5. inverse FT'
 
+  gridImage = inverseFT(gridImageFT)
   if gridImage is None:
     gridImage = np.zeros( (height,width), dtype=np.complex_ )
 
@@ -140,9 +151,17 @@ def compute():
 
   print '6. remove grid'
 
+  resultImage = np.zeros( (height,width), dtype=np.complex_ )
+
+  for h in range(height):
+    for w in range(width):
+      if(gridImage[h,w] > 16): #if the grid is bright at this pixel
+        resultImage[h,w] = 0 #remove the pixel in the original (to remove grid)
+      else:
+        resultImage[h,w] = image[h,w].copy() #otherwise keep original
+
   if resultImage is None:
     resultImage = image.copy()
-
   print 'done'
 
   return resultImage, lines
