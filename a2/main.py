@@ -66,12 +66,12 @@ def magFromComplex( c ):
 #
 # Do the following in the compute() function:
 #
-#   1. Compute the FT of the image.  Store it in 'imageFT'.
+#   DONE 1. Compute the FT of the image.  Store it in 'imageFT'.
 #
-#   2. Compute and store the FT magnitudes.  Find the maximum
+#   DONE 2. Compute and store the FT magnitudes.  Find the maximum
 #      magnitude, EXCLUDING the DC component in [0,0]. 
 #
-#   3. Set to zero the components of 'imageFT' that have magnitude
+#   DONE 3. Set to zero the components of 'imageFT' that have magnitude
 #      less than 40% the maximum magnitude.  Store this new FT in
 #      'gridImageFT'.  Record in a list the (x,y) locations of the
 #      non-zero magnitudes of 'gridImageFT'.
@@ -82,9 +82,9 @@ def magFromComplex( c ):
 #      THIS IS DIFFICULT and can be left until everything else is
 #      working.
 #
-#   5. Apply the inverse FT to 'gridImageFT' to get 'gridImage'.
+#   DONE 5. Apply the inverse FT to 'gridImageFT' to get 'gridImage'.
 #
-#   6. For each (x,y) location in 'gridImage' that has a bright pixel
+#   DONE 6. For each (x,y) location in 'gridImage' that has a bright pixel
 #      of value > 16 (i.e. is one of the grid lines), set to zero the
 #      corresponding pixel in the original 'image'.  Do not modify
 #      'image'; instead, store your result in 'resultImage'.
@@ -99,7 +99,6 @@ def compute():
   width  = image.shape[1]
 
   # Forward FT
-
   print '1. compute FT'
   imageFT = forwardFT(image)
 
@@ -109,19 +108,21 @@ def compute():
   for h in range(height):
     for w in range(width):
       mags[h][w] = magFromComplex(imageFT[h,w])
-
-  tempZero = mags[0][0]
-  mags[0][0] = 0
-  maxMag = max(map(max, mags))
+	  
+  tempZero = mags[0][0] #store the DC component in a temporary variable
+  mags[0][0] = 0 #set the DC component to 0
+  maxMag = max(map(max, mags)) #compute maximum magnitude
+  print 'Maximum magnitude is: %s' % maxMag 
+  mags[0][0] = tempZero #return the original value to the origin
 
   # Zero the components that are less than 40% of the max
   print '3. removing low-magnitude components'
 
   if gridImageFT is None:
     gridImageFT = np.zeros( (height,width), dtype=np.complex_ )
-
+	
   zeroed = [[False for x in range(width)] for y in range(height)] #storing which ones we did and did not set to zero for later
-  threshold = 0.4 * maxMag # as per block comment instructions abve
+  threshold = 0.4 * maxMag # as per block comment instructions above
   mags[0][0] = tempZero #reset this (not sure if this is right)
   for h in range(height):
     for w in range(width):
@@ -129,18 +130,26 @@ def compute():
         gridImageFT[h,w] = 0 #set to zero if below threshold
         zeroed[h][w] = True
       else:
-        gridImageFT[h,w] = imageFT[h,w] #otherwise copy value unchaged
-
-  # Find (angle, distance) to each peak
-  #
+        gridImageFT[h,w] = imageFT[h,w] #otherwise copy value unchanged
+  
   # lines = [ (angle1,distance1), (angle2,distance2) ]
-
   lines = [[1,2],[3,4]]
-
+  
+  # Find (angle, distance) to each peak
   print '4. finding angles and distances of grid lines'
-
+  
+  for h in range(height):
+    for w in range(width):
+	  if (zeroed[h][w] == False):
+	   distance = np.sqrt(h^2 + w^2)
+	   print 'distance %s' % distance
+	   if (w == 0):
+	    angle = 90
+	   else:
+	    angle = np.arctan(h/w)
+	   print 'angle %s' % angle
+  
   # Convert back to spatial domain to get a grid-like image
-
   print '5. inverse FT'
 
   gridImage = inverseFT(gridImageFT)
@@ -148,7 +157,6 @@ def compute():
     gridImage = np.zeros( (height,width), dtype=np.complex_ )
 
   # Remove grid image from original image
-
   print '6. remove grid'
 
   resultImage = np.zeros( (height,width), dtype=np.complex_ )
@@ -483,7 +491,7 @@ def keyboard( key, x, y ):
     translate = (0,0)
 
   elif key == 'c': # compute
-    image, lines = compute()
+    resultImage, lines = compute()
     print 'Grid lines:'
     for line in lines:
       print '  angle %.1f, distance %d' % (line[0],line[1])
@@ -794,7 +802,7 @@ if len(sys.argv) > 2:
     elif cmd == 'p':
       outputMagnitudes = False
     elif cmd == 'c':
-      image, lines = compute()
+      resultImage, lines = compute()
       print lines
     elif cmd[0] == 'o': # image name follows in 'cmds'
       filename = cmds.pop(0)
