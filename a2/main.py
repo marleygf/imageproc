@@ -66,12 +66,12 @@ def magFromComplex( c ):
 #
 # Do the following in the compute() function:
 #
-#   DONE 1. Compute the FT of the image.  Store it in 'imageFT'.
+#   1. Compute the FT of the image.  Store it in 'imageFT'.
 #
-#   DONE 2. Compute and store the FT magnitudes.  Find the maximum
+#   2. Compute and store the FT magnitudes.  Find the maximum
 #      magnitude, EXCLUDING the DC component in [0,0]. 
 #
-#   DONE 3. Set to zero the components of 'imageFT' that have magnitude
+#   3. Set to zero the components of 'imageFT' that have magnitude
 #      less than 40% the maximum magnitude.  Store this new FT in
 #      'gridImageFT'.  Record in a list the (x,y) locations of the
 #      non-zero magnitudes of 'gridImageFT'.
@@ -82,9 +82,9 @@ def magFromComplex( c ):
 #      THIS IS DIFFICULT and can be left until everything else is
 #      working.
 #
-#   DONE 5. Apply the inverse FT to 'gridImageFT' to get 'gridImage'.
+#   5. Apply the inverse FT to 'gridImageFT' to get 'gridImage'.
 #
-#   DONE 6. For each (x,y) location in 'gridImage' that has a bright pixel
+#   6. For each (x,y) location in 'gridImage' that has a bright pixel
 #      of value > 16 (i.e. is one of the grid lines), set to zero the
 #      corresponding pixel in the original 'image'.  Do not modify
 #      'image'; instead, store your result in 'resultImage'.
@@ -100,19 +100,19 @@ def compute():
 
   # Forward FT
   print '1. compute FT'
-  imageFT = forwardFT(image)
+  imageFT = forwardFT(image) #compute the fourier transform of image and store it in imageFT
 
   # Compute magnitudes and find the maximum (excluding the DC component)
-  mags = [[0 for x in range(width)] for y in range(height)] 
+  mags = [[0 for x in range(width)] for y in range(height)] #declare a 2D list the same size as imageFT
   print '2. computing FT magnitudes'
   for h in range(height):
     for w in range(width):
-      mags[h][w] = magFromComplex(imageFT[h,w])
+      mags[h][w] = magFromComplex(imageFT[h,w]) #compute the magnitude of imageFT and store the value in the corresponding location in mags
 	  
   tempZero = mags[0][0] #store the DC component in a temporary variable
   mags[0][0] = 0 #set the DC component to 0
   maxMag = max(map(max, mags)) #compute maximum magnitude
-  #mags[0][0] = tempZero #return the original value to the origin
+  mags[0][0] = tempZero #return the original value to the origin
 
   # Zero the components that are less than 40% of the max
   print '3. removing low-magnitude components'
@@ -121,84 +121,79 @@ def compute():
     gridImageFT = np.zeros( (height,width), dtype=np.complex_ )
 	
   zeroed = [[False for x in range(width)] for y in range(height)] #storing which ones we did and did not set to zero for later
-  threshold = 0.4 * maxMag # as per block comment instructions above
-  mags[0][0] = tempZero #reset this (not sure if this is right)
+  threshold = 0.4 * maxMag #set threshold value
+ 
   for h in range(height):
     for w in range(width):
       if mags[h][w] < threshold:
         gridImageFT[h,w] = 0 #set to zero if below threshold
-        zeroed[h][w] = True
+        zeroed[h][w] = True #indicate this pixel has been set to zero
       else:
-        gridImageFT[h,w] = imageFT[h,w] #otherwise copy value unchanged
+        gridImageFT[h,w] = imageFT[h,w] #otherwise copy value to gridImageFT unchanged
   
   print '4. finding angles and distances of grid lines'
   
   # Find (angle, distance) to each peak
-  #
   # lines = [ (angle1,distance1), (angle2,distance2) ]
   
-  points = []
-  cleaned_points = []
+  points = [] #instantiate list
 
-  #itterate through that range
+  #iterate through the pixels in the bottom half of gridImageFT
   
   for h in range((height/2)):
     for w in range(width):
-      if (zeroed[h][w] == False):
+      if (zeroed[h][w] == False): #filter out all pixels that have been set to zero
         
         angle = None
         distance = None
 
-        if w > (width/2):
-          distance = np.sqrt(np.square(h) + np.square(w-width))
-          angle = (np.arctan2(h,(w - width))) * 180.0 / np.pi
+        if w > (width/2): #divide the bottom half of the image into two quadrants
+          distance = np.sqrt(np.square(h) + np.square(w-width)) #calculate the distance to the point from the origin
+          angle = (np.arctan2(h,(w - width))) * 180.0 / np.pi #calculate the angle of the point wrt the origin
           if angle >= 180:
-            angle = angle - 180
-        else:
-          distance = np.sqrt(np.square(h) + np.square(w))
-          angle = (np.arctan2(h,w)) * 180.0 / np.pi
+            angle = angle - 180 #ensure all angles are under 180 degrees
+        else: #iterate through the second quadrant
+          distance = np.sqrt(np.square(h) + np.square(w)) #calculate the distance to the point from the origin
+          angle = (np.arctan2(h,w)) * 180.0 / np.pi #calculate the angle of the point wrt the origin
           if angle >= 180:
-            angle = angle - 180
+            angle = angle - 180 #ensure all angles are under 180 degrees
 
-        if distance > 15:
+        if distance > 15: #eliminate points that are too close to the origin
           point = [angle, distance]
-          points.append(point)
+          points.append(point) #add new points to the list points
   
-  points = sorted(points,key=lambda x: x[0])
+  points = sorted(points,key=lambda x: x[0]) #sort the list by angle 
   
   firstAngle = points[0][0]
   split = None
   for i in range(len(points)):
-    if abs(points[i][0] - firstAngle) > 60:
-      split = i
+    if abs(points[i][0] - firstAngle) > 60: #index where to split the list by angle value
+      split = i 
       break
 
-  pointsA = points[:split]
+  pointsA = points[:split] #split the original list points into lists pointsA and pointsB
   pointsB = points[split:]
 
-  angle1 = [float(sum(a))/len(a) for a in zip(*pointsA)][0]
-  angle2 = [float(sum(b))/len(b) for b in zip(*pointsB)][0]
+  angle1 = [float(sum(a))/len(a) for a in zip(*pointsA)][0] #calculate average angle for pointsA
+  angle2 = [float(sum(b))/len(b) for b in zip(*pointsB)][0] #calculate average angle for pointsB
 
   distance1 = pointsA[0][1]
   for i in range(len(pointsA)):
     if pointsA[i][1] < distance1:
-      distance1 = pointsA[i][1]
+      distance1 = pointsA[i][1] #find the distance that is closest to the origin in pointsA
 
   distance2 = pointsB[0][1]
   for i in range(len(pointsB)):
     if pointsB[i][1] < distance2:
-      distance2 = pointsB[i][1]
+      distance2 = pointsB[i][1] #find the distance that is closest to the origin in pointsA
 
   lines = [ (angle1,distance1), (angle2,distance2) ]
-
-  #if zeroed
-  #calculate angle and distance
-  #append to list
   
   # Convert back to spatial domain to get a grid-like image
   print '5. inverse FT'
 
-  gridImage = inverseFT(gridImageFT)
+  gridImage = inverseFT(gridImageFT) #take the inverse FT of gridImageFT to get gridImage
+  
   if gridImage is None:
     gridImage = np.zeros( (height,width), dtype=np.complex_ )
 
@@ -210,9 +205,9 @@ def compute():
   for h in range(height):
     for w in range(width):
       if(gridImage[h,w] > 16): #if the grid is bright at this pixel
-        resultImage[h,w] = 0 #remove the pixel in the original (to remove grid)
+        resultImage[h,w] = 0 #remove the pixel in the original image (to remove grid)
       else:
-        resultImage[h,w] = image[h,w].copy() #otherwise keep original
+        resultImage[h,w] = image[h,w].copy() #otherwise keep original value
 
   if resultImage is None:
     resultImage = image.copy()
