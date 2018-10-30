@@ -112,8 +112,7 @@ def compute():
   tempZero = mags[0][0] #store the DC component in a temporary variable
   mags[0][0] = 0 #set the DC component to 0
   maxMag = max(map(max, mags)) #compute maximum magnitude
-  print 'Maximum magnitude is: %s' % maxMag 
-  mags[0][0] = tempZero #return the original value to the origin
+  #mags[0][0] = tempZero #return the original value to the origin
 
   # Zero the components that are less than 40% of the max
   print '3. removing low-magnitude components'
@@ -132,22 +131,69 @@ def compute():
       else:
         gridImageFT[h,w] = imageFT[h,w] #otherwise copy value unchanged
   
-  # lines = [ (angle1,distance1), (angle2,distance2) ]
-  lines = [[1,2],[3,4]]
-  
-  # Find (angle, distance) to each peak
   print '4. finding angles and distances of grid lines'
   
-  for h in range(height):
+  # Find (angle, distance) to each peak
+  #
+  # lines = [ (angle1,distance1), (angle2,distance2) ]
+  
+  points = []
+  cleaned_points = []
+
+  #itterate through that range
+  
+  for h in range((height/2)):
     for w in range(width):
-	  if (zeroed[h][w] == False):
-	   distance = np.sqrt(h^2 + w^2)
-	   print 'distance %s' % distance
-	   if (w == 0):
-	    angle = 90
-	   else:
-	    angle = np.arctan(h/w)
-	   print 'angle %s' % angle
+      if (zeroed[h][w] == False):
+        
+        angle = None
+        distance = None
+
+        if w > (width/2):
+          distance = np.sqrt(np.square(h) + np.square(w-width))
+          angle = (np.arctan2(h,(w - width))) * 180.0 / np.pi
+          if angle >= 180:
+            angle = angle - 180
+        else:
+          distance = np.sqrt(np.square(h) + np.square(w))
+          angle = (np.arctan2(h,w)) * 180.0 / np.pi
+          if angle >= 180:
+            angle = angle - 180
+
+        if distance > 15:
+          point = [angle, distance]
+          points.append(point)
+  
+  points = sorted(points,key=lambda x: x[0])
+  
+  firstAngle = points[0][0]
+  split = None
+  for i in range(len(points)):
+    if abs(points[i][0] - firstAngle) > 60:
+      split = i
+      break
+
+  pointsA = points[:split]
+  pointsB = points[split:]
+
+  angle1 = [float(sum(a))/len(a) for a in zip(*pointsA)][0]
+  angle2 = [float(sum(b))/len(b) for b in zip(*pointsB)][0]
+
+  distance1 = pointsA[0][1]
+  for i in range(len(pointsA)):
+    if pointsA[i][1] < distance1:
+      distance1 = pointsA[i][1]
+
+  distance2 = pointsB[0][1]
+  for i in range(len(pointsB)):
+    if pointsB[i][1] < distance2:
+      distance2 = pointsB[i][1]
+
+  lines = [ (angle1,distance1), (angle2,distance2) ]
+
+  #if zeroed
+  #calculate angle and distance
+  #append to list
   
   # Convert back to spatial domain to get a grid-like image
   print '5. inverse FT'
