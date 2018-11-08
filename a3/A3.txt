@@ -1,0 +1,29 @@
+CISC/CMPE 457 Assignment 3
+
+Due November 16 before class
+
+In this assignment, you will compute Canny edges of images.
+
+Undergraduates may work in groups of two.  Graduate students must work
+individually.
+
+1. Get the main.py code running.  Read all of the code and understand
+   how it works.
+
+2. Modify the parts of the code with 'YOUR CODE HERE' according to the
+   comment above that function in the code.
+
+To submit:
+
+In a single directory called 'a3' put the following files:
+
+  README.txt - containing the name, student number, and netID of each
+               person working on the assignment.  Include here any
+               comments you have for the TA. 
+
+  main.py    - the modified code, well commented.
+
+  DO NOT INCLUDE THE images DIRECTORY.
+
+For marking, we will read your code and will run your code on the
+images provided, and on other images.
