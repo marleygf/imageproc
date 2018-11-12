@@ -157,8 +157,25 @@ def findGradients( image, gradientMags, gradientDirs ):
   width  = image.shape[1]
 
   # YOUR CODE HERE
-
+  '''
+  Dx = np.array( [[1, 0, -1],
+                  [2, 0, -2],
+                  [1, 0, -1]] )
+				  
+  Dy = np.array( [[ 1,  2,  1],
+                  [ 0,  0,  0],
+                  [-1, -2, -1]] )
+				  
+  Convolve Dx and Dy with Image to get Gx and Gy
+  (see part 1 for steps)
   
+  At each pixel, compute gradientMags
+  gradientMags[i] = sqrt(Gx[i]^2 + Gy[i]^2)
+  
+  At each pixel, compute gradientDirs ***0-7 slices in one line***
+  gradientDirs[i] = (nearest int(arctan2(Gy[i]/Gx[i])/(pi/4)))modulo 8
+  
+  '''
 
 # Suppress the non-maxima in the gradient directions
 #
